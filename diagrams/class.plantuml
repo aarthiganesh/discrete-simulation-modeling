@@ -1,0 +1,62 @@
+@startuml class diagram
+
+package simpy {
+    class container {
+        capacity: Union[int, float]
+        init: Union[int, float]
+    }
+    class environment {}
+}
+
+
+class Buffer {
+    id: int
+    accepts: Component
+    ----
+    will_accept(): bool
+}
+
+
+enum Component {
+    C1
+    C2
+    C3
+}
+
+
+class Inspector {
+    id: int
+    env: environment
+    buffers: List[Buffer]
+    components: List[Component]
+    ----
+    get_random_component(): Component
+    get_inspection_time(): int
+    inspect_component: Generator
+    add_component_to_buffer(): Generator
+    main_loop(): None
+}
+
+
+class Workstation {
+    id: int
+    env: environment
+    buffers: List[Buffer]
+    ----
+    get_assembly_time(): int
+    get_components(): Generator
+    assemble(): Generator
+    main_loop(): None
+}
+
+
+container <|-- Buffer
+
+environment -- Inspector
+environment -- Workstation
+
+Component -- Buffer
+Component -- Inspector
+Component -- Workstation
+
+@enduml
