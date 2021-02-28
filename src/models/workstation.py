@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import Generator, List
 
 import simpy
 from simpy import Environment
@@ -21,7 +21,7 @@ class Workstation(object):
     return random.randint(1, 3)
 
 
-  def get_components(self) -> simpy.events.AllOf:
+  def get_components(self) -> Generator:
     '''Wait for all buffers to have at least one component ready for production'''
     if not self.buffers:
       raise RuntimeError('Workstation has no component buffers')
@@ -31,7 +31,7 @@ class Workstation(object):
     yield self.env.all_of(component_ready_events)
 
   
-  def assemble(self) -> None:
+  def assemble(self) -> Generator:
     '''Assemble a product from components.'''
     print('workstation {} starting assembly at {}'.format(self.id, self.env.now))
     yield self.env.timeout(self.get_assembly_time())
