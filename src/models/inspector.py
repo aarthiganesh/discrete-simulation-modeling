@@ -26,6 +26,7 @@ class Inspector(object):
     if component == Component.C1:
       return 0
     else:
+      # return numpy.random.
       return random.randint(1, 3)
   
   
