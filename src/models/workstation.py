@@ -27,17 +27,17 @@ class Workstation(object):
     if not self.buffers:
       raise RuntimeError('Workstation has no component buffers')
     
-    print('workstation {} waiting for components at {}'.format(self.id, self.env.now))
+    # print('workstation {} waiting for components at {}'.format(self.id, self.env.now))
     component_ready_events = [buffer.get(amount=1) for buffer in self.buffers]
     yield self.env.all_of(component_ready_events)
 
   
   def assemble(self) -> Generator:
     '''Assemble a product from components.'''
-    print('workstation {} starting assembly at {}'.format(self.id, self.env.now))
+    # print('workstation {} starting assembly at {}'.format(self.id, self.env.now))
     yield self.env.timeout(self.get_assembly_time())
     self.total_amount_assembled += 1
-    print('workstation {} finished assembly at {}'.format(self.id, self.env.now))
+    # print('workstation {} finished assembly at {}'.format(self.id, self.env.now))
   
 
   def main_loop(self) -> None:

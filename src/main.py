@@ -1,10 +1,13 @@
+from math import e
 import random
+import time
 from typing import List
 
 import numpy as np
 from numpy.core.fromnumeric import mean
 
 import simpy
+from simpy.core import T
 
 from models import Buffer, Component, Inspector, Workstation
 
@@ -12,7 +15,7 @@ from models import Buffer, Component, Inspector, Workstation
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 5
+ITERATIONS = 100
 
 
 def get_means() -> dict:
@@ -107,7 +110,7 @@ def run_iteration(seed: int, means: dict):
 
   # Start simulation
   main_env.run(until=SIM_TIME)
-  print('total amount assembled = %d' % w1.total_amount_assembled)
+  # print('total amount assembled = %d' % w1.total_amount_assembled)
 
 
 
@@ -122,5 +125,10 @@ if __name__ == '__main__':
   # Create a list of seeds to use
   seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
 
+  start_time = time.time()
+
   for seed in seed_list:
     run_iteration(seed=seed, means=means)
+
+  end_time = time.time()
+  print('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
