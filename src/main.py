@@ -1,6 +1,9 @@
 import random
 from typing import List
 
+import numpy as np
+from numpy.core.fromnumeric import mean
+
 import simpy
 
 from models import Buffer, Component, Inspector, Workstation
@@ -8,7 +11,32 @@ from models import Buffer, Component, Inspector, Workstation
 # Control constants
 SEED = 12345
 BUFFER_SIZE = 2
-SIM_TIME = 100
+SIM_TIME = 480 # 8 hour shift?
+
+
+def get_means() -> dict:
+  '''Get a dictionary of all the means from the data for each file'''
+  means = dict()
+
+  data = np.fromfile('./data/servinsp1.dat', dtype=np.float64, sep="\n")
+  means[Component.C1.name] = np.mean(data)
+
+  data = np.fromfile('./data/servinsp22.dat', dtype=np.float64, sep="\n")
+  means[Component.C2.name] = np.mean(data)
+
+  data = np.fromfile('./data/servinsp1.dat', dtype=np.float64, sep="\n")
+  means[Component.C3.name] = np.mean(data)
+
+  data = np.fromfile('./data/ws1.dat', dtype=np.float64, sep="\n")
+  means['ws1'] = np.mean(data)
+
+  data = np.fromfile('./data/ws2.dat', dtype=np.float64, sep="\n")
+  means['ws2'] = np.mean(data)
+
+  data = np.fromfile('./data/ws3.dat', dtype=np.float64, sep="\n")
+  means['ws3'] = np.mean(data)
+
+  return means
 
 
 if __name__ == '__main__':
@@ -30,16 +58,32 @@ if __name__ == '__main__':
   b3c1 = Buffer(id='w3c1', env=main_env, accepts=Component.C1, capacity=BUFFER_SIZE, init=0)
   b3c3 = Buffer(id='w3c3', env=main_env, accepts=Component.C3, capacity=BUFFER_SIZE, init=0)
   
+  # Get means for RNG
+  means = get_means()
+
   # Init workstations
-  w1 = Workstation(id=1, env=main_env, buffers=[b1c1])
-  w2 = Workstation(id=2, env=main_env, buffers=[b2c1, b2c2])
-  w3 = Workstation(id=3, env=main_env, buffers=[b3c1, b3c3])
+  w1 = Workstation(id=1, env=main_env, buffers=[b1c1], mean=means['ws1'])
+  w2 = Workstation(id=2, env=main_env, buffers=[b2c1, b2c2], mean=means['ws2'])
+  w3 = Workstation(id=3, env=main_env, buffers=[b3c1, b3c3], mean=means['ws3'])
 
   workstation_list: List[Workstation] = [w1, w2, w3]
 
   # Init inspectors
-  inspector_one = Inspector(id=1, env=main_env, components=[Component.C1], buffers=[b1c1, b2c1, b3c1])
-  inspector_two = Inspector(id=2, env=main_env, components=[Component.C2, Component.C3], buffers=[b2c2, b3c3])
+  inspector_one = Inspector(
+    id=1, 
+    env=main_env, 
+    components=[Component.C1], 
+    buffers=[b1c1, b2c1, b3c1], 
+    means={ key: means[key] for key in [Component.C1.name] }
+  )
+  
+  inspector_two = Inspector(
+    id=2, 
+    env=main_env, 
+    components=[Component.C2, Component.C3], 
+    buffers=[b2c2, b3c3], 
+    means={ key: means[key] for key in [Component.C2.name, Component.C3.name] }
+  )
 
   inspector_list: List[Inspector] = [inspector_one, inspector_two]
 

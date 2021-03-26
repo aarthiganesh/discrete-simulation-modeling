@@ -8,17 +8,18 @@ from .buffer import Buffer
 
 
 class Workstation(object):
-  def __init__(self, id: int, env: Environment, buffers: List[Buffer]) -> None:
+  def __init__(self, id: int, env: Environment, buffers: List[Buffer], mean: float) -> None:
     super().__init__()
     self.id = id
     self.env = env
     self.buffers = buffers
     self.total_amount_assembled = 0
+    self.mean = mean
 
 
-  def get_assembly_time(self) -> int:
+  def get_assembly_time(self) -> float:
     '''Get the assembly time for a component'''
-    return random.randint(1, 3)
+    return random.expovariate(1 / self.mean)
 
 
   def get_components(self) -> Generator:

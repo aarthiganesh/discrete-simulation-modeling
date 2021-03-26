@@ -8,12 +8,13 @@ from .buffer import Buffer
 from .component import Component
 
 class Inspector(object):
-  def __init__(self, id: int,  env: Environment, components: List[Component], buffers: List[Buffer]) -> None:
+  def __init__(self, id: int,  env: Environment, components: List[Component], buffers: List[Buffer], means: dict) -> None:
     super().__init__()
     self.id = id
     self.env = env
     self.buffers = buffers
     self.components = components
+    self.means = means
 
 
   def get_random_component(self) -> Component:
@@ -21,13 +22,9 @@ class Inspector(object):
     return random.choice(self.components)
 
 
-  def get_inspection_time(self, component: Component) -> int:
+  def get_inspection_time(self, component: Component) -> float:
     '''Get the inspection time for a specific component'''
-    if component == Component.C1:
-      return 0
-    else:
-      # return numpy.random.
-      return random.randint(1, 3)
+    return random.expovariate(1 / self.means[component.name])
   
   
   def inspect_component(self) -> Generator:
