@@ -12,6 +12,7 @@ from models import Buffer, Component, Inspector, Workstation
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
+ITERATIONS = 5
 
 
 def get_means() -> dict:
@@ -39,9 +40,20 @@ def get_means() -> dict:
   return means
 
 
-if __name__ == '__main__':
+def run_iteration(seed: int, means: dict):
+  '''
+  Run a single iteration for the simulation. Creates a new environment each time
+  ...
+  Parameters
+  ----------
+  seed: int
+    The seed to be used for the random generation
+  means: dict
+    The means to use for the random expovariate functions
+  '''
+
   # Set up random generation
-  random.seed(SEED)
+  random.seed(seed)
 
   # Set up environment
   main_env = simpy.Environment()
@@ -57,9 +69,6 @@ if __name__ == '__main__':
   # Init buffers for workstation 3
   b3c1 = Buffer(id='w3c1', env=main_env, accepts=Component.C1, capacity=BUFFER_SIZE, init=0)
   b3c3 = Buffer(id='w3c3', env=main_env, accepts=Component.C3, capacity=BUFFER_SIZE, init=0)
-  
-  # Get means for RNG
-  means = get_means()
 
   # Init workstations
   w1 = Workstation(id=1, env=main_env, buffers=[b1c1], mean=means['ws1'])
@@ -98,5 +107,20 @@ if __name__ == '__main__':
 
   # Start simulation
   main_env.run(until=SIM_TIME)
-
   print('total amount assembled = %d' % w1.total_amount_assembled)
+
+
+
+
+if __name__ == '__main__':
+  # Set up random generation
+  random.seed(SEED)
+
+  # Get means for RNG
+  means = get_means()
+
+  # Create a list of seeds to use
+  seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
+
+  for seed in seed_list:
+    run_iteration(seed=seed, means=means)
