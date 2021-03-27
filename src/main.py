@@ -159,6 +159,9 @@ if __name__ == '__main__':
   # Set up random generation
   random.seed(SEED)
 
+  # Set up logging
+  init_logging()
+
   # Get means for RNG
   means = init_means()
 
