@@ -1,4 +1,5 @@
 # Calculate statistics for each run of the simulation
+import logging
 from typing import List, Union
 
 import numpy as np
@@ -7,7 +8,7 @@ import pandas as pd
 
 from models import Inspector, Workstation
 
-def calculate_statistics_workstation(workstations: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> pd.DataFrame:
+def calculate_statistics_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> pd.DataFrame:
   '''
   Calculate statistics for all workstations for a single simulation iteration. 
   ...
@@ -25,35 +26,45 @@ def calculate_statistics_workstation(workstations: List[Workstation], iteration:
   pandas.Dataframe:
     A dataframe with the calculated statistics for each run
   '''
-  workstation_array = np.empty(shape=(len(workstations),), dtype=object)
+  workstation_array = np.empty(shape=(len(workstation_list),), dtype=object)
 
   # Calculate statistics for workstations
-  for i in range(len(workstations)):
-    workstation = workstations[i]
+  for index, workstation in enumerate(workstation_list):
 
-    # Calculate mean and variance of workstation processing time
-    if (workstation.total_amount_assembled < 0):
+    # TODO: check for case if has started assembly but has not finished?
+    # Check if workstation has assembled anything
+    if (workstation.total_amount_assembled == 0):
+      if workstation.start != 0:
+        logging.error('Iteration {}: ws{} started assembly but did not finish'.format(iteration, workstation.id))
+      # If nothing was assembled by the workstation, set specific values
+      mean = np.nan,
+      variance = np.nan,
+      throughput = 0
+      total_idle_time = sim_duration - workstation.start
+      utilization = 0
+      average_idle_length = sim_duration - workstation.start
+
+    else:
+      # Calculate mean and variance of workstation processing time
       processing_time = np.asarray(workstation.processing_time)
       mean = processing_time.mean()
       variance = processing_time.var()
-    else:
-      mean = np.nan
-      variance = np.nan
 
-    # Calculate overall throughput
-    throughput = workstation.total_amount_assembled
+      # Calculate overall throughput
+      throughput = workstation.total_amount_assembled
 
-    # Calculate total idle time
-    wait_time = np.asarray(workstation.wait_time)
-    total_idle_time = wait_time.sum()
+      # Calculate total idle time
+      wait_time = np.asarray(workstation.wait_time)
+      total_idle_time = wait_time.sum()
 
-    # Calculate utilization
-    utilization = (sim_duration - total_idle_time) / sim_duration
+      # Calculate utilization
+      utilization = (sim_duration - total_idle_time) / sim_duration
 
-    # Calculate average idle length
-    wait_time[wait_time == 0] = np.nan  # Set all zero values to nan 
-    average_idle_length = np.nanmean(wait_time)
-
+      # Calculate average idle length
+      wait_time[wait_time == 0] = np.nan  # Set all zero values to nan 
+      average_idle_length = np.nanmean(wait_time)
+    
+    
     # Store all values in pandas Series
     workstation_series = pd.Series({
       'iteration': iteration,
@@ -66,8 +77,8 @@ def calculate_statistics_workstation(workstations: List[Workstation], iteration:
       'average_idle_length': average_idle_length
     })
 
-    workstation_array[i] = workstation_series
-  
+    workstation_array[index] = workstation_series
+
   return workstation_series
 
 

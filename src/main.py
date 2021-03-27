@@ -18,7 +18,7 @@ from runanalysis import calculate_statistics_workstation
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 1
+ITERATIONS = 1000
 
 current_iteration = 0
 w1_wait_time = []
@@ -130,7 +130,7 @@ def run_iteration(seed: int, means: dict, iteration:int):
     main_env.process(inspector.main_loop())
   
 
-  # Start simulation
+  # Run simulation
   main_env.run(until=SIM_TIME)
 
   # Record values
@@ -147,11 +147,11 @@ def run_iteration(seed: int, means: dict, iteration:int):
   # print('w3 wait time: {}'.format(w3_wait_time))
 
 
-  # workstation_stats[iteration] = calculate_statistics_workstation(
-  #   workstations=workstation_list,
-  #   iteration=iteration,
-  #   sim_duration=SIM_TIME
-  # )
+  workstation_stats[iteration] = calculate_statistics_workstation(
+    workstation_list=workstation_list,
+    iteration=iteration,
+    sim_duration=SIM_TIME
+  )
 
 
 
@@ -169,6 +169,7 @@ if __name__ == '__main__':
   seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
 
   start_time = time.time()
+  logging.info('Running {} iterations of the simulation'.format(ITERATIONS))
 
   for seed in seed_list:
     run_iteration(seed=seed, means=means, iteration=current_iteration)
