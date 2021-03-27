@@ -115,13 +115,17 @@ def calc_stats_inspector(inspectors: List[Inspector], workstations: List[Worksta
     pass
 
 
-def calc_stats_all_runs(run_data: np.ndarray) -> None:
+def create_df_workstations(run_data: np.ndarray) -> pd.DataFrame:
   '''
-  Calculate averages for all runs.
+  Create a dataframe to store all workstation stats for each simulation iteration 
   '''
   
   # Flatten array into pandas dataframe
-  df = pd.DataFrame(np.vstack(run_data), columns=['iteration', 'workstation_id', 'processing_time_mean', 'processing_time_variance', 'throughput', 'total_idle_time', 'utilization', 'average_idle_length'])
+  return pd.DataFrame(
+    data=np.vstack(run_data), 
+    columns=['iteration', 'workstation_id', 'processing_time_mean', 
+             'processing_time_variance', 'throughput', 'total_idle_time', 
+             'utilization', 'average_idle_length']
+  )
 
-  print(df)
 
