@@ -18,7 +18,7 @@ import runanalysis
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 1000
+ITERATIONS = 2
 
 current_iteration = 0
 w1_wait_time = []
@@ -176,7 +176,9 @@ if __name__ == '__main__':
     current_iteration += 1
     # print(current_iteration)
 
-
+  
+  # Calculate stats for whole run
+  runanalysis.calc_stats_all_runs(run_data=workstation_stats)
 
 
   logging.info('{measurement} for {source}: {quantity}'.format(

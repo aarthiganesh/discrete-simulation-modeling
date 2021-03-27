@@ -23,8 +23,8 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
   
   Returns
   ----------
-  pandas.Dataframe:
-    A dataframe with the calculated statistics for each run
+  numpy.array:
+    A 2d numpy array with each row as the statistics for one of the workstations
   '''
   workstation_array = np.empty(shape=(len(workstation_list),), dtype=object)
 
@@ -66,6 +66,20 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
     
     
     # Store all values in pandas Series
+    # ws_stats = np.array(
+    #   [iteration, workstation.id, mean, variance, throughput, 
+    #   total_idle_time, utilization, average_idle_length],
+    #   dtype=[('iteration', 'i4'), 
+    #          ('workstation_id', 'i4'), 
+    #          ('processing_time_mean', 'f8'), 
+    #          ('processing_time_variance', 'f8'),
+    #          ('throughput', 'i4'),
+    #          ('total_idle_time', 'f8'),
+    #          ('utilization', 'f8'),
+    #          ('average_idle_length', 'f8')]
+    # )
+    # workstation_array[index] = ws_stats
+
     workstation_series = pd.Series({
       'iteration': iteration,
       'workstation_id': workstation.id,
@@ -77,9 +91,9 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
       'average_idle_length': average_idle_length
     })
 
-    workstation_array[index] = workstation_series
-
-  return workstation_series
+    workstation_array[index] = workstation_series.to_numpy()
+    
+  return np.stack(workstation_array)
 
 
 def calc_stats_inspector(inspectors: List[Inspector], workstations: List[Workstation], sim_duration: Union[int, float]):
@@ -105,4 +119,9 @@ def calc_stats_all_runs(run_data: np.ndarray) -> None:
   '''
   Calculate averages for all runs.
   '''
+  
+  # Flatten array into pandas dataframe
+  df = pd.DataFrame(np.vstack(run_data), columns=['iteration', 'workstation_id', 'processing_time_mean', 'processing_time_variance', 'throughput', 'total_idle_time', 'utilization', 'average_idle_length'])
+
+  print(df)
 
