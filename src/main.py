@@ -150,6 +150,12 @@ if __name__ == '__main__':
     current_iteration += 1
     # print(current_iteration)
 
-  print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
+
+  print('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Processing Time',
+    source='Workstation 1',
+    quantity=numpy.mean(np.hstack(w1_processing_time).mean())
+  ))
+  # print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
   print('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
