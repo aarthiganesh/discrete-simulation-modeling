@@ -40,7 +40,6 @@ class Inspector(object):
 
     # inspect the component
     yield self.env.timeout(self.get_inspection_time(component))
-    # print('inspector {} inspected component {} at {}'.format(self.id, component.name, self.env.now))
     logging.debug('inspector {} inspected component {} at {}'.format(self.id, component.name, self.env.now))
     return component # Return the component so it can be placed in the correct buffer
 
@@ -63,7 +62,6 @@ class Inspector(object):
         # Wait until at least one buffer is ready
         buffer_ready_events = [buffer.put(amount=1) for buffer in self.buffers]
         result = yield self.env.any_of(buffer_ready_events)
-        # print('result of wait for inspector is {}'.format(result))
         logging.debug('result of wait for inspector is {}'.format(result))
 
       # If buffer has space, add directly to that buffer
@@ -79,7 +77,6 @@ class Inspector(object):
       buffer_list = list(filter(lambda x: (x.will_accept(component)), self.buffers))
       if len(buffer_list) > 0:
         yield buffer_list[0].put(amount=1)
-        # print('inspector 2 put component {} in buffer {} at {}'.format(component.name, buffer_list[0].id, self.env.now))
         logging.debug('inspector 2 put component {} in buffer {} at {}'.format(component.name, buffer_list[0].id, self.env.now))
   
 
