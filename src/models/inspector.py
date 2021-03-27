@@ -15,11 +15,16 @@ class Inspector(object):
     self.buffers = buffers
     self.components = components
     self.means = means
+    self.start = 0
+    self.end = 0
+    self.wait_time = []
+    self.inspection_time = []
 
 
   def get_random_component(self) -> Component:
     '''Return a random component for the inspector to inspect'''
     return random.choice(self.components)
+    self.start = self.env.now
 
 
   def get_inspection_time(self, component: Component) -> float:

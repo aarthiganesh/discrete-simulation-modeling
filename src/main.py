@@ -9,14 +9,24 @@ from numpy.core.fromnumeric import mean
 import simpy
 from simpy.core import T
 
+import numpy
+
 from models import Buffer, Component, Inspector, Workstation
 
 # Control constants
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 100
+ITERATIONS = 5
 
+current_iteration = 0
+w1_wait_time = []
+w2_wait_time = []
+w3_wait_time = []
+
+w1_processing_time = []
+w2_processing_time = []
+w3_processing_time = []
 
 def get_means() -> dict:
   '''Get a dictionary of all the means from the data for each file'''
@@ -43,7 +53,7 @@ def get_means() -> dict:
   return means
 
 
-def run_iteration(seed: int, means: dict):
+def run_iteration(seed: int, means: dict, iteration:int):
   '''
   Run a single iteration for the simulation. Creates a new environment each time
   ...
@@ -107,11 +117,19 @@ def run_iteration(seed: int, means: dict):
   # Set up inspector processes
   for inspector in inspector_list:
     main_env.process(inspector.main_loop())
+  
 
   # Start simulation
   main_env.run(until=SIM_TIME)
-  # print('total amount assembled = %d' % w1.total_amount_assembled)
 
+  # Record values
+  w1_wait_time.append(w1.wait_time)
+  w2_wait_time.append(w2.wait_time)
+  w3_wait_time.append(w3.wait_time)
+
+  w1_processing_time.append(w1.processing_time)
+  w2_processing_time.append(w2.processing_time)
+  w3_processing_time.append(w3.processing_time)
 
 
 
@@ -128,7 +146,10 @@ if __name__ == '__main__':
   start_time = time.time()
 
   for seed in seed_list:
-    run_iteration(seed=seed, means=means)
+    run_iteration(seed=seed, means=means, iteration=current_iteration)
+    current_iteration += 1
+    # print(current_iteration)
 
+  print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
   print('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
