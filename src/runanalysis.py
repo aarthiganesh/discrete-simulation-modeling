@@ -8,7 +8,7 @@ import pandas as pd
 
 from models import Inspector, Workstation
 
-def calculate_statistics_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> pd.DataFrame:
+def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> pd.DataFrame:
   '''
   Calculate statistics for all workstations for a single simulation iteration. 
   ...
@@ -82,7 +82,7 @@ def calculate_statistics_workstation(workstation_list: List[Workstation], iterat
   return workstation_series
 
 
-def calculate_statistics(inspectors: List[Inspector], workstations: List[Workstation], sim_duration: Union[int, float]):
+def calc_stats_inspector(inspectors: List[Inspector], workstations: List[Workstation], sim_duration: Union[int, float]):
   '''
   Calculate statistics for each run. 
   ...
@@ -99,3 +99,10 @@ def calculate_statistics(inspectors: List[Inspector], workstations: List[Worksta
   # Calculate statistics for inspectors
   for inspector in inspectors:
     pass
+
+
+def calc_stats_all_runs(run_data: np.ndarray) -> None:
+  '''
+  Calculate averages for all runs.
+  '''
+

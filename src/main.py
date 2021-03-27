@@ -12,7 +12,7 @@ from simpy.core import T
 import numpy
 
 from models import Buffer, Component, Inspector, Workstation, workstation
-from runanalysis import calculate_statistics_workstation
+import runanalysis
 
 # Control constants
 SEED = 12345
@@ -147,7 +147,7 @@ def run_iteration(seed: int, means: dict, iteration:int):
   # print('w3 wait time: {}'.format(w3_wait_time))
 
 
-  workstation_stats[iteration] = calculate_statistics_workstation(
+  workstation_stats[iteration] = runanalysis.calc_stats_workstation(
     workstation_list=workstation_list,
     iteration=iteration,
     sim_duration=SIM_TIME
@@ -175,6 +175,8 @@ if __name__ == '__main__':
     run_iteration(seed=seed, means=means, iteration=current_iteration)
     current_iteration += 1
     # print(current_iteration)
+
+
 
 
   logging.info('{measurement} for {source}: {quantity}'.format(
