@@ -1,4 +1,4 @@
-from math import e
+import logging
 import random
 import time
 from typing import List
@@ -11,13 +11,14 @@ from simpy.core import T
 
 import numpy
 
-from models import Buffer, Component, Inspector, Workstation
+from models import Buffer, Component, Inspector, Workstation, workstation
+from runanalysis import calculate_statistics_workstation
 
 # Control constants
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 5
+ITERATIONS = 1
 
 current_iteration = 0
 w1_wait_time = []
@@ -28,7 +29,17 @@ w1_processing_time = []
 w2_processing_time = []
 w3_processing_time = []
 
-def get_means() -> dict:
+workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
+
+
+def init_logging() -> None:
+  '''Init logging for system'''
+  format = "%(asctime)s: %(message)s"
+  logging.basicConfig(format=format, level=logging.INFO, datefmt='%H:%M:%S')
+
+
+
+def init_means() -> dict:
   '''Get a dictionary of all the means from the data for each file'''
   means = dict()
 
@@ -131,6 +142,17 @@ def run_iteration(seed: int, means: dict, iteration:int):
   w2_processing_time.append(w2.processing_time)
   w3_processing_time.append(w3.processing_time)
 
+  # print('w1 wait time: {}'.format(w1_wait_time))
+  # print('w2 wait time: {}'.format(w2_wait_time))
+  # print('w3 wait time: {}'.format(w3_wait_time))
+
+
+  # workstation_stats[iteration] = calculate_statistics_workstation(
+  #   workstations=workstation_list,
+  #   iteration=iteration,
+  #   sim_duration=SIM_TIME
+  # )
+
 
 
 if __name__ == '__main__':
@@ -138,7 +160,7 @@ if __name__ == '__main__':
   random.seed(SEED)
 
   # Get means for RNG
-  means = get_means()
+  means = init_means()
 
   # Create a list of seeds to use
   seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
@@ -151,11 +173,23 @@ if __name__ == '__main__':
     # print(current_iteration)
 
 
-  print('{measurement} for {source}: {quantity}'.format(
+  logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',
     source='Workstation 1',
     quantity=numpy.mean(np.hstack(w1_processing_time).mean())
   ))
+
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Processing Time',
+    source='Workstation 2',
+    quantity=numpy.mean(np.hstack(w2_processing_time).mean())
+  ))
+
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Processing Time',
+    source='Workstation 3',
+    quantity=numpy.mean(np.hstack(w3_processing_time).mean())
+  ))
   # print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
-  print('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
+  logging.info('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))

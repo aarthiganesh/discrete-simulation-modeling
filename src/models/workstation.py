@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import Generator, List
 
@@ -35,6 +36,7 @@ class Workstation(object):
       raise RuntimeError('Workstation has no component buffers')
     
     # print('workstation {} waiting for components at {}'.format(self.id, self.env.now))
+    logging.DEBUG('workstation {} finished assembly at {}'.format(self.id, self.env.now))
     self.wait = self.env.now
     component_ready_events = [buffer.get(amount=1) for buffer in self.buffers]
     yield self.env.all_of(component_ready_events)
@@ -43,6 +45,7 @@ class Workstation(object):
   def assemble(self) -> Generator:
     '''Assemble a product from components.'''
     # print('workstation {} starting assembly at {}'.format(self.id, self.env.now))
+    logging.DEBUG('workstation {} starting assembly at {}'.format(self.id, self.env.now))
     self.start = self.env.now
     self.wait_time.append(-self.wait+self.start)
 
@@ -51,6 +54,7 @@ class Workstation(object):
     self.end = self.env.now
     self.processing_time.append(self.end-self.start)
     # print('workstation {} finished assembly at {}'.format(self.id, self.env.now))
+    logging.DEBUG('workstation {} finished assembly at {}'.format(self.id, self.env.now))
   
 
   def main_loop(self) -> None:
