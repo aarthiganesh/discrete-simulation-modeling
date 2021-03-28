@@ -19,7 +19,7 @@ import runanalysis
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 2000
+ITERATIONS = 200
 
 current_iteration = 0
 w1_wait_time = []
@@ -36,7 +36,7 @@ workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
 def init_logging() -> None:
   '''Init logging for system'''
   format = "%(asctime)s: %(message)s"
-  logging.basicConfig(format=format, level=logging.DEBUG, stream=sys.stdout, datefmt='%H:%M:%S')
+  logging.basicConfig(format=format, level=logging.INFO, stream=sys.stdout, datefmt='%H:%M:%S')
 
 
 
@@ -181,33 +181,33 @@ if __name__ == '__main__':
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
 
-  print('throughput for workstation 1 is {}'.format(ws_df.query('workstation_id==1')['throughput'].sum()))
-  print('throughput for workstation 2 is {}'.format(ws_df.query('workstation_id==2')['throughput'].sum()))
-  print('throughput for workstation 3 is {}'.format(ws_df.query('workstation_id==3')['throughput'].sum()))
+  # print('throughput for workstation 1 is {}'.format(ws_df.query('workstation_id==1')['throughput'].sum()))
+  # print('throughput for workstation 2 is {}'.format(ws_df.query('workstation_id==2')['throughput'].sum()))
+  # print('throughput for workstation 3 is {}'.format(ws_df.query('workstation_id==3')['throughput'].sum()))
 
+
+  # print(ws_df.query('workstation_id==2')['processing_time_mean'])
 
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',
     source='Workstation 1',
-    quantity=ws_df.query('workstation_id==1')['processing_time_mean'].mean()
+    quantity=ws_df.query('workstation_id==1')['processing_time_mean'].mean(skipna=True)
   ))
 
 
   # This does not work if there is nan?
 
-  # logging.info('{measurement} for {source}: {quantity}'.format(
-  #   measurement='Average Processing Time',
-  #   source='Workstation 2',
-  #   quantity=ws_df.query('workstation_id==2')['processing_time_mean'].mean()
-  #   # quantity=numpy.mean(np.hstack(w2_processing_time).mean())
-  # ))
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Processing Time',
+    source='Workstation 2',
+    quantity=ws_df.query('workstation_id==2')['processing_time_mean'].mean(skipna=True)
+  ))
 
-  # logging.info('{measurement} for {source}: {quantity}'.format(
-  #   measurement='Average Processing Time',
-  #   source='Workstation 3',
-  #   quantity=ws_df.query('workstation_id==3')['processing_time_mean'].mean()
-  #   # quantity=numpy.mean(np.hstack(w3_processing_time).mean())
-  # ))
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Processing Time',
+    source='Workstation 3',
+    quantity=ws_df.query('workstation_id==3')['processing_time_mean'].mean(skipna=True)
+  ))
   # print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
   logging.info('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))

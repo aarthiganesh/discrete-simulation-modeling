@@ -120,11 +120,17 @@ def create_df_workstations(run_data: np.ndarray) -> pd.DataFrame:
   Create a dataframe to store all workstation stats for each simulation iteration 
   '''
   # Flatten array into pandas dataframe
-  return pd.DataFrame(
+  df = pd.DataFrame(
     data=np.vstack(run_data), 
     columns=['iteration', 'workstation_id', 'processing_time_mean', 
              'processing_time_variance', 'throughput', 'total_idle_time', 
              'utilization', 'average_idle_length']
   )
+
+  # Convert (nan,) tuple to just NaN
+  df['processing_time_mean'] = pd.to_numeric(df['processing_time_mean'], errors='coerce')
+  df['processing_time_variance'] = pd.to_numeric(df['processing_time_variance'], errors='coerce')
+
+  return df
 
 
