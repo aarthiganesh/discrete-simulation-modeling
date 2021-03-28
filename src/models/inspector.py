@@ -61,8 +61,10 @@ class Inspector(object):
       if most_empty_buffer.level == most_empty_buffer.capacity:
         # Wait until at least one buffer is ready
         buffer_ready_events = [buffer.put(amount=1) for buffer in self.buffers]
+        start_time = self.env.now
         result = yield self.env.any_of(buffer_ready_events)
-        logging.debug('result of wait for inspector is {}'.format(result))
+        end_time = self.env.now
+        logging.debug('result of wait for inspector is {}, time={}'.format(result, end_time-start_time))
 
       # If buffer has space, add directly to that buffer
       else:

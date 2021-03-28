@@ -2,6 +2,7 @@ import logging
 import random
 import time
 from typing import List
+import sys
 
 import numpy as np
 from numpy.core.fromnumeric import mean
@@ -18,7 +19,7 @@ import runanalysis
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 200
+ITERATIONS = 2000
 
 current_iteration = 0
 w1_wait_time = []
@@ -35,7 +36,7 @@ workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
 def init_logging() -> None:
   '''Init logging for system'''
   format = "%(asctime)s: %(message)s"
-  logging.basicConfig(format=format, level=logging.INFO, datefmt='%H:%M:%S')
+  logging.basicConfig(format=format, level=logging.DEBUG, stream=sys.stdout, datefmt='%H:%M:%S')
 
 
 
@@ -179,6 +180,10 @@ if __name__ == '__main__':
   
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
+
+  print('throughput for workstation 1 is {}'.format(ws_df.query('workstation_id==1')['throughput'].sum()))
+  print('throughput for workstation 2 is {}'.format(ws_df.query('workstation_id==2')['throughput'].sum()))
+  print('throughput for workstation 3 is {}'.format(ws_df.query('workstation_id==3')['throughput'].sum()))
 
 
   logging.info('{measurement} for {source}: {quantity}'.format(

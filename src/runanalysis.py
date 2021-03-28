@@ -8,7 +8,7 @@ import pandas as pd
 
 from models import Inspector, Workstation
 
-def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> pd.DataFrame:
+def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> np.ndarray:
   '''
   Calculate statistics for all workstations for a single simulation iteration. 
   ...
@@ -39,9 +39,9 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
       # If nothing was assembled by the workstation, set specific values
       mean = np.nan,
       variance = np.nan,
-      throughput = 0
+      throughput = 0 # Fractional if not complete at end of iteration??
       total_idle_time = sim_duration - workstation.start
-      utilization = 0
+      utilization = 0 #?? fix this later???
       average_idle_length = sim_duration - workstation.start
 
     else:
@@ -119,7 +119,6 @@ def create_df_workstations(run_data: np.ndarray) -> pd.DataFrame:
   '''
   Create a dataframe to store all workstation stats for each simulation iteration 
   '''
-  
   # Flatten array into pandas dataframe
   return pd.DataFrame(
     data=np.vstack(run_data), 
