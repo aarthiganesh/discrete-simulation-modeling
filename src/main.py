@@ -19,7 +19,7 @@ import runanalysis
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 200
+ITERATIONS = 2
 
 current_iteration = 0
 w1_wait_time = []
@@ -31,6 +31,7 @@ w2_processing_time = []
 w3_processing_time = []
 
 workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
+inspector_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
 
 
 def init_logging() -> None:
@@ -148,8 +149,16 @@ def run_iteration(seed: int, means: dict, iteration:int):
   # print('w3 wait time: {}'.format(w3_wait_time))
 
 
+  # Calculate stats for workstation for this iteration
   workstation_stats[iteration] = runanalysis.calc_stats_workstation(
     workstation_list=workstation_list,
+    iteration=iteration,
+    sim_duration=SIM_TIME
+  )
+
+  # Calculate stats for inspector for this iteration
+  inspector_stats[iteration] = runanalysis.calc_stats_inspector(
+    inspector_list=inspector_list,
     iteration=iteration,
     sim_duration=SIM_TIME
   )
@@ -180,6 +189,7 @@ if __name__ == '__main__':
   
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
+  insp_df = runanalysis.create_df_inspectors(run_data=inspector_stats)
 
   # print('throughput for workstation 1 is {}'.format(ws_df.query('workstation_id==1')['throughput'].sum()))
   # print('throughput for workstation 2 is {}'.format(ws_df.query('workstation_id==2')['throughput'].sum()))
