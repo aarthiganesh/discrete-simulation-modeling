@@ -19,7 +19,7 @@ import runanalysis
 SEED = 12345
 BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
-ITERATIONS = 2
+ITERATIONS = 200
 
 current_iteration = 0
 w1_wait_time = []
@@ -186,7 +186,6 @@ if __name__ == '__main__':
     current_iteration += 1
     # print(current_iteration)
 
-  
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
   insp_df = runanalysis.create_df_inspectors(run_data=inspector_stats)
@@ -196,7 +195,7 @@ if __name__ == '__main__':
   # print('throughput for workstation 3 is {}'.format(ws_df.query('workstation_id==3')['throughput'].sum()))
 
 
-  # print(ws_df.query('workstation_id==2')['processing_time_mean'])
+  # print(insp_df.query("component_id=='C2'"))
 
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',
@@ -218,6 +217,13 @@ if __name__ == '__main__':
     source='Workstation 3',
     quantity=ws_df.query('workstation_id==3')['processing_time_mean'].mean(skipna=True)
   ))
+
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Throughput',
+    source='Inspector 2, component 2',
+    quantity=insp_df.query("component_id=='C2'")['component_throughput'].mean(skipna=True)
+  ))
+
   # print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
   logging.info('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
