@@ -1,3 +1,4 @@
+import argparse
 import logging
 import random
 import time
@@ -16,10 +17,13 @@ from models import Buffer, Component, Inspector, Workstation, workstation
 import runanalysis
 
 # Control constants
-SEED = 12345
+
 BUFFER_SIZE = 2
-SIM_TIME = 43800 # 8 hour shift?
-ITERATIONS = 200
+
+# Control constants (will be set later by argument parser)
+# SEED = 12345
+# SIM_TIME = 43800 # 8 hour shift?
+# ITERATIONS = 200
 
 w1_wait_time = []
 w2_wait_time = []
@@ -29,36 +33,28 @@ w1_processing_time = []
 w2_processing_time = []
 w3_processing_time = []
 
-workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
-inspector_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
+
+def parse_arguments():
+  '''Parse arguments from the command line'''
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-i', '--iterations', type=int, default=200)
+  parser.add_argument('-d', '--duration', type=int, default=480)
+  parser.add_argument('-s', '--seed', type=int, default=12345)
+
+  # Create global control constants
+  global ITERATIONS, SIM_TIME, SEED 
+
+  # Set globals with command line arguments
+  args = parser.parse_args()
+  ITERATIONS = args.iterations
+  SIM_TIME = args.duration
+  SEED = args.seed
 
 
 def init_logging() -> None:
   '''Init logging for system'''
   format = "%(asctime)s: %(message)s"
   logging.basicConfig(format=format, level=logging.INFO, stream=sys.stdout, datefmt='%H:%M:%S')
-
-
-def print_progress_bar (iteration: int, total: int, prefix: str='', suffix: str='', decimals: int= 1, length: int=100, fill: str='█', printEnd: str="\r"):
-  """
-  Call in a loop to create terminal progress bar
-  @params:
-      iteration   - Required  : current iteration (Int)
-      total       - Required  : total iterations (Int)
-      prefix      - Optional  : prefix string (Str)
-      suffix      - Optional  : suffix string (Str)
-      decimals    - Optional  : positive number of decimals in percent complete (Int)
-      length      - Optional  : character length of bar (Int)
-      fill        - Optional  : bar fill character (Str)
-      printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-  """
-  percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-  filledLength = int(length * iteration // total)
-  bar = fill * filledLength + '-' * (length - filledLength)
-  print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
-  # Print New Line on Complete
-  if iteration == total: 
-      print()
 
 
 def init_means() -> dict:
@@ -85,6 +81,27 @@ def init_means() -> dict:
 
   return means
 
+
+def print_progress_bar (iteration: int, total: int, prefix: str='', suffix: str='', decimals: int= 1, length: int=100, fill: str='█', printEnd: str="\r"):
+  """
+  Call in a loop to create terminal progress bar
+  @params:
+      iteration   - Required  : current iteration (Int)
+      total       - Required  : total iterations (Int)
+      prefix      - Optional  : prefix string (Str)
+      suffix      - Optional  : suffix string (Str)
+      decimals    - Optional  : positive number of decimals in percent complete (Int)
+      length      - Optional  : character length of bar (Int)
+      fill        - Optional  : bar fill character (Str)
+      printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+  """
+  percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+  filledLength = int(length * iteration // total)
+  bar = fill * filledLength + '-' * (length - filledLength)
+  print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+  # Print New Line on Complete
+  if iteration == total: 
+      print()
 
 def run_iteration(seed: int, means: dict, iteration:int):
   '''
@@ -186,6 +203,9 @@ def run_iteration(seed: int, means: dict, iteration:int):
 
 
 if __name__ == '__main__':
+  # Parse command line arguments
+  parse_arguments()
+  
   # Set up random generation
   random.seed(SEED)
 
@@ -198,8 +218,12 @@ if __name__ == '__main__':
   # Create a list of seeds to use
   seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
 
+  # Create empty numpy arrays for storing statistics from each simulation iteration
+  workstation_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
+  inspector_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
+
   start_time = time.time()
-  logging.info('Running the simulation for {} iterations of {} duration'.format(ITERATIONS, SIM_TIME))
+  logging.info('Running the simulation with seed={seed}, iterations={iters} duration={duration}'.format(seed=SEED, iters=ITERATIONS, duration=SIM_TIME))
 
   for index, seed in enumerate(seed_list):
     run_iteration(seed=seed, means=means, iteration=index)
