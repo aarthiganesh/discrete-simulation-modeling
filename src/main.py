@@ -224,6 +224,24 @@ if __name__ == '__main__':
     quantity=insp_df.query("component_id=='C2'")['component_throughput'].mean(skipna=True)
   ))
 
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Throughput per hour',
+    source='Workstation 1',
+    quantity=(ws_df.query("workstation_id==1")['throughput'].mean(skipna=True) / (SIM_TIME / 60))
+  ))
+
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Throughput per hour',
+    source='Workstation 2',
+    quantity=(ws_df.query("workstation_id==2")['throughput'].mean(skipna=True) / (SIM_TIME / 60))
+  ))
+
+  logging.info('{measurement} for {source}: {quantity}'.format(
+    measurement='Average Throughput per hour',
+    source='Workstation 3',
+    quantity=(ws_df.query("workstation_id==3")['throughput'].mean(skipna=True) / (SIM_TIME / 60))
+  ))
+
   # print('Average processing time:{}'.format(numpy.mean(np.hstack(w1_processing_time).mean())))
   end_time = time.time()
   logging.info('elapsed time for {} iterations is {}'.format(ITERATIONS, end_time-start_time))
