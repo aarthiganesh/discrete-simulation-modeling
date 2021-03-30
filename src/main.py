@@ -18,7 +18,7 @@ import runanalysis
 # Control constants
 SEED = 12345
 BUFFER_SIZE = 2
-SIM_TIME = 480 # 8 hour shift?
+SIM_TIME = 43800 # 8 hour shift?
 ITERATIONS = 200
 
 w1_wait_time = []
@@ -199,7 +199,7 @@ if __name__ == '__main__':
   seed_list = [random.getrandbits(32) for iteration in range(ITERATIONS)]
 
   start_time = time.time()
-  logging.info('Running {} iterations of the simulation'.format(ITERATIONS))
+  logging.info('Running the simulation for {} iterations of {} duration'.format(ITERATIONS, SIM_TIME))
 
   for index, seed in enumerate(seed_list):
     run_iteration(seed=seed, means=means, iteration=index)
