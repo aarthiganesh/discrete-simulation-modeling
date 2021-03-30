@@ -21,7 +21,6 @@ BUFFER_SIZE = 2
 SIM_TIME = 480 # 8 hour shift?
 ITERATIONS = 200
 
-current_iteration = 0
 w1_wait_time = []
 w2_wait_time = []
 w3_wait_time = []
@@ -39,6 +38,27 @@ def init_logging() -> None:
   format = "%(asctime)s: %(message)s"
   logging.basicConfig(format=format, level=logging.INFO, stream=sys.stdout, datefmt='%H:%M:%S')
 
+
+def print_progress_bar (iteration: int, total: int, prefix: str='', suffix: str='', decimals: int= 1, length: int=100, fill: str='█', printEnd: str="\r"):
+  """
+  Call in a loop to create terminal progress bar
+  @params:
+      iteration   - Required  : current iteration (Int)
+      total       - Required  : total iterations (Int)
+      prefix      - Optional  : prefix string (Str)
+      suffix      - Optional  : suffix string (Str)
+      decimals    - Optional  : positive number of decimals in percent complete (Int)
+      length      - Optional  : character length of bar (Int)
+      fill        - Optional  : bar fill character (Str)
+      printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+  """
+  percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+  filledLength = int(length * iteration // total)
+  bar = fill * filledLength + '-' * (length - filledLength)
+  print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+  # Print New Line on Complete
+  if iteration == total: 
+      print()
 
 
 def init_means() -> dict:
@@ -181,10 +201,9 @@ if __name__ == '__main__':
   start_time = time.time()
   logging.info('Running {} iterations of the simulation'.format(ITERATIONS))
 
-  for seed in seed_list:
-    run_iteration(seed=seed, means=means, iteration=current_iteration)
-    current_iteration += 1
-    # print(current_iteration)
+  for index, seed in enumerate(seed_list):
+    run_iteration(seed=seed, means=means, iteration=index)
+    print_progress_bar(iteration=index, total=ITERATIONS, prefix='Progress:', length=50)
 
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
