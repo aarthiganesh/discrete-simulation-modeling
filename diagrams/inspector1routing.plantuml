@@ -1,0 +1,14 @@
+@startuml Inspector 1 Routing Policy
+start
+  :Identify most empty buffer(s);
+
+  if (Tie for most empty buffer?) then
+    ->Yes;
+    :Add to buffer with highest priority;
+  else
+    ->No;
+    :Add to most empty buffer;
+  endif
+stop
+
+@enduml

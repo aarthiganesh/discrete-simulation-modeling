@@ -1,0 +1,15 @@
+@startuml Inspector Flow Diagram
+
+start
+
+repeat
+  :Inspect component;
+  while (Open buffer slot for component?) is (No)
+    :Wait for open buffer slot;
+  endwhile (Yes)
+  :Place component in buffer according to routing policy;
+repeat while (Simulation finished?) is (no)
+->yes;
+stop
+
+@enduml

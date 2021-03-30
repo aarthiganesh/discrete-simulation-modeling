@@ -1,0 +1,18 @@
+@startuml Workstation Flow Diagram
+
+start
+
+repeat
+  if (All components available in buffer?) then 
+    ->Yes;
+    :Get component(s) from buffer;
+    :Build product;
+  else
+    ->No;
+    :Wait for components;
+  endif
+repeat while (Simulation finished?) is (no)
+->yes;
+stop
+
+@enduml
