@@ -35,7 +35,7 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
     # Check if workstation has assembled anything
     if (workstation.total_amount_assembled == 0):
       if workstation.start != 0:
-        logging.error('Iteration {}: ws{} started assembly but did not finish'.format(iteration, workstation.id))
+        logging.debug('Iteration {}: ws{} started assembly but did not finish'.format(iteration, workstation.id))
       # If nothing was assembled by the workstation, set specific values
       mean = np.nan,
       variance = np.nan,
@@ -129,7 +129,7 @@ def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_du
       # Check if inspector has inspected anything
       if (inspector.total_amount_inspected[component.name] == 0):
         if inspector.start != 0:
-          logging.error('Iteration {}: insp{} started inspection for component {} but did not finish'.format(iteration, inspector.id, component.name))
+          logging.debug('Iteration {}: insp{} started inspection for component {} but did not finish'.format(iteration, inspector.id, component.name))
         # If nothing was inspected, set specific values
         mean = np.nan,
         variance = np.nan,
