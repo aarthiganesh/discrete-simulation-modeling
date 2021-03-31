@@ -264,7 +264,7 @@ if __name__ == '__main__':
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Throughput',
     source='Inspector 2, component 2',
-    quantity=insp_df.query("component_id=='C2'")['component_throughput'].mean(skipna=True)
+    quantity=insp_df.query("component_id==2")['component_throughput'].mean(skipna=True)
   ))
 
   logging.info('{measurement} for {source}: {quantity}'.format(

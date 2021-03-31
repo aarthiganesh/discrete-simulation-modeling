@@ -148,14 +148,14 @@ def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_du
       inspector_series = pd.Series({
         'iteration': iteration,
         'inspector_id': inspector.id,
-        'component_id': component.name,
+        'component_id': component.value,
         'component_inspection_time_mean': mean,
         'component_inspection_time_variance': variance,
         'component_throughput': throughput,
         'total_idle_time': total_idle_time,
         'utilization': utilization,
         'average_idle_length': average_idle_length
-      })
+      }, dtype='float')
 
       # Save series to be returned
       inspector_array[current_index] = inspector_series.to_numpy()
@@ -198,12 +198,13 @@ def create_df_inspectors(run_data: np.ndarray) -> pd.DataFrame:
     data=np.vstack(run_data), 
     columns=['iteration', 'inspector_id', 'component_id',
         'component_inspection_time_mean', 'component_inspection_time_variance',
-        'component_throughput', 'total_idle_time', 'utilization', 'average_idle_length']
+        'component_throughput', 'total_idle_time', 'utilization', 'average_idle_length'],
+    dtype='float'
   )
 
   # Convert (nan,) tuple to just NaN
   # df['processing_time_mean'] = pd.to_numeric(df['processing_time_mean'], errors='coerce')
   # df['processing_time_variance'] = pd.to_numeric(df['processing_time_variance'], errors='coerce')
 
-  return df
+  return df.astype('float')
 
