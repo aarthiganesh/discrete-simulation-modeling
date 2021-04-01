@@ -16,13 +16,14 @@ class Inspector(object):
     self.buffers = buffers
     self.components = components
     self.means = means
+
+    # Stats for analysis
     self.start_recording = start_recording
     self.current_inspection_time = None
     self.current_component = None
     self.start = 0
     self.end = 0
     self.wait_time = []
-    # self.inspection_time = []
     self.inspection_times = {component.name:list() for component in components}
     self.total_amount_inspected = {component.name:0 for component in components}
 

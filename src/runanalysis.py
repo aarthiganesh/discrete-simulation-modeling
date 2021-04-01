@@ -112,8 +112,10 @@ def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_du
     wait_time = np.asarray(inspector.wait_time)
     total_idle_time = wait_time.sum()
 
+    
     # Calculate utilization
     utilization = ((sim_duration - start_recording) - total_idle_time) / (sim_duration - start_recording)
+    
 
     # Calculate average idle length
     if (np.any(wait_time != 0.0)):

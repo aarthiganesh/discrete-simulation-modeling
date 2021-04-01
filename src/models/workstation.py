@@ -16,9 +16,11 @@ class Workstation(object):
     self.id = id
     self.env = env
     self.buffers = buffers
-    self.total_amount_assembled = 0
     self.mean = mean
     self.start_recording = start_recording
+
+    # Stats for analysis
+    self.total_amount_assembled = 0
     self.wait_time = []
     self.processing_time = []
     self.wait = 0
