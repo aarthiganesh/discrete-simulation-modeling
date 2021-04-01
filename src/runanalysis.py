@@ -8,7 +8,7 @@ import pandas as pd
 
 from models import Inspector, Workstation
 
-def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float]) -> np.ndarray:
+def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, sim_duration: Union[int, float], start_recording: Union[int, float]=0) -> np.ndarray:
   '''
   Calculate statistics for all workstations for a single simulation iteration. 
   ...
@@ -40,9 +40,9 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
       mean = np.nan,
       variance = np.nan,
       throughput = 0 # Fractional if not complete at end of iteration??
-      total_idle_time = sim_duration - workstation.start
+      total_idle_time = (sim_duration - start_recording) - workstation.start
       utilization = 0 #?? fix this later???
-      average_idle_length = sim_duration - workstation.start
+      average_idle_length = (sim_duration - start_recording) - workstation.start
 
     else:
       # Calculate mean and variance of workstation processing time
@@ -58,7 +58,7 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
       total_idle_time = wait_time.sum()
 
       # Calculate utilization
-      utilization = (sim_duration - total_idle_time) / sim_duration
+      utilization = ((sim_duration - start_recording)  - total_idle_time) / (sim_duration - start_recording)
 
       # Calculate average idle length
       wait_time[wait_time == 0] = np.nan  # Set all zero values to nan 
@@ -80,7 +80,7 @@ def calc_stats_workstation(workstation_list: List[Workstation], iteration: int, 
   return np.stack(workstation_array)
 
 
-def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_duration: Union[int, float]):
+def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_duration: Union[int, float], start_recording: Union[int, float]=0):
   '''
   Calculate statistics for all inspectors for a single simulation iteration. 
   ...
@@ -113,7 +113,7 @@ def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_du
     total_idle_time = wait_time.sum()
 
     # Calculate utilization
-    utilization = (sim_duration - total_idle_time) / sim_duration
+    utilization = ((sim_duration - start_recording) - total_idle_time) / (sim_duration - start_recording)
 
     # Calculate average idle length
     if (np.any(wait_time != 0.0)):
@@ -137,7 +137,7 @@ def calc_stats_inspector(inspector_list: List[Inspector], iteration: int, sim_du
 
       else:
         # Calculate mean and variance of inspector processing time
-        processing_time = np.asarray(inspector.inspection_time[component.name])
+        processing_time = np.asarray(inspector.inspection_times[component.name])
         mean = processing_time.mean()
         variance = processing_time.var()
 

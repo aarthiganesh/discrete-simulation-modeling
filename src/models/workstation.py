@@ -1,6 +1,6 @@
 import logging
 import random
-from typing import Generator, List
+from typing import Generator, List, Union
 
 import simpy
 from simpy import Environment
@@ -11,13 +11,14 @@ from .buffer import Buffer
 
 
 class Workstation(object):
-  def __init__(self, id: int, env: Environment, buffers: List[Buffer], mean: float) -> None:
+  def __init__(self, id: int, env: Environment, buffers: List[Buffer], mean: float, start_recording: Union[int, float]=0) -> None:
     super().__init__()
     self.id = id
     self.env = env
     self.buffers = buffers
     self.total_amount_assembled = 0
     self.mean = mean
+    self.start_recording = start_recording
     self.wait_time = []
     self.processing_time = []
     self.wait = 0
@@ -45,20 +46,26 @@ class Workstation(object):
     '''Assemble a product from components.'''
     logging.debug('workstation {} starting assembly at {}'.format(self.id, self.env.now))
     self.start = self.env.now
-    self.wait_time.append(-self.wait+self.start)
-
     yield self.env.timeout(self.get_assembly_time())
-    self.total_amount_assembled += 1
     self.end = self.env.now
-    self.processing_time.append(self.end-self.start)
+    
     logging.debug('workstation {} finished assembly at {}'.format(self.id, self.env.now))
   
+
+  def record_stats(self) -> None:
+    '''Record stats in data'''
+    self.total_amount_assembled += 1
+    self.wait_time.append(-self.wait+self.start)
+    self.processing_time.append(self.end-self.start)
+
 
   def main_loop(self) -> None:
     '''Main sequence loop for Workstation.'''
     while True:
       yield self.env.process(self.get_components())
       yield self.env.process(self.assemble())
+      if (self.env.now >= self.start_recording):
+        self.record_stats()
       
 
     
