@@ -40,6 +40,7 @@ def parse_arguments():
   parser.add_argument('-i', '--iterations', type=int, default=200)
   parser.add_argument('-d', '--duration', type=int, default=480)
   parser.add_argument('-s', '--seed', type=int, default=12345)
+  parser.add_argument('-w', '--wait', type=int, default=1000)
 
   # Create global control constants
   global ITERATIONS, SIM_TIME, SEED, START_RECORDING
@@ -49,7 +50,7 @@ def parse_arguments():
   ITERATIONS = args.iterations
   SIM_TIME = args.duration
   SEED = args.seed
-  START_RECORDING = 1000
+  START_RECORDING = args.wait
 
 
 def init_logging() -> None:
@@ -228,7 +229,7 @@ if __name__ == '__main__':
   inspector_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
 
   start_time = time.time()
-  logging.info('Running the simulation with seed={seed}, iterations={iters} duration={duration}'.format(seed=SEED, iters=ITERATIONS, duration=SIM_TIME))
+  logging.info('Running the simulation with seed={seed}, iterations={iters} duration={duration}, wait={wait}'.format(seed=SEED, iters=ITERATIONS, duration=SIM_TIME, wait=START_RECORDING))
 
   for index, seed in enumerate(seed_list):
     run_iteration(seed=seed, means=means, iteration=index)
