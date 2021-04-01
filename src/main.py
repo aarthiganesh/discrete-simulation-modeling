@@ -40,15 +40,17 @@ def parse_arguments():
   parser.add_argument('-i', '--iterations', type=int, default=200)
   parser.add_argument('-d', '--duration', type=int, default=480)
   parser.add_argument('-s', '--seed', type=int, default=12345)
+  parser.add_argument('-w', '--wait', type=int, default=1000)
 
   # Create global control constants
-  global ITERATIONS, SIM_TIME, SEED 
+  global ITERATIONS, SIM_TIME, SEED, START_RECORDING
 
   # Set globals with command line arguments
   args = parser.parse_args()
   ITERATIONS = args.iterations
   SIM_TIME = args.duration
   SEED = args.seed
+  START_RECORDING = args.wait
 
 
 def init_logging() -> None:
@@ -134,9 +136,9 @@ def run_iteration(seed: int, means: dict, iteration:int):
   b3c3 = Buffer(id='w3c3', env=main_env, accepts=Component.C3, capacity=BUFFER_SIZE, init=0)
 
   # Init workstations
-  w1 = Workstation(id=1, env=main_env, buffers=[b1c1], mean=means['ws1'])
-  w2 = Workstation(id=2, env=main_env, buffers=[b2c1, b2c2], mean=means['ws2'])
-  w3 = Workstation(id=3, env=main_env, buffers=[b3c1, b3c3], mean=means['ws3'])
+  w1 = Workstation(id=1, env=main_env, buffers=[b1c1], mean=means['ws1'], start_recording=START_RECORDING)
+  w2 = Workstation(id=2, env=main_env, buffers=[b2c1, b2c2], mean=means['ws2'], start_recording=START_RECORDING)
+  w3 = Workstation(id=3, env=main_env, buffers=[b3c1, b3c3], mean=means['ws3'], start_recording=START_RECORDING)
 
   workstation_list: List[Workstation] = [w1, w2, w3]
 
@@ -146,7 +148,8 @@ def run_iteration(seed: int, means: dict, iteration:int):
     env=main_env, 
     components=[Component.C1], 
     buffers=[b1c1, b2c1, b3c1], 
-    means={ key: means[key] for key in [Component.C1.name] }
+    means={ key: means[key] for key in [Component.C1.name] },
+    start_recording=START_RECORDING
   )
   
   inspector_two = Inspector(
@@ -154,7 +157,8 @@ def run_iteration(seed: int, means: dict, iteration:int):
     env=main_env, 
     components=[Component.C2, Component.C3], 
     buffers=[b2c2, b3c3], 
-    means={ key: means[key] for key in [Component.C2.name, Component.C3.name] }
+    means={ key: means[key] for key in [Component.C2.name, Component.C3.name] },
+    start_recording=START_RECORDING
   )
 
   inspector_list: List[Inspector] = [inspector_one, inspector_two]
@@ -190,14 +194,16 @@ def run_iteration(seed: int, means: dict, iteration:int):
   workstation_stats[iteration] = runanalysis.calc_stats_workstation(
     workstation_list=workstation_list,
     iteration=iteration,
-    sim_duration=SIM_TIME
+    sim_duration=SIM_TIME,
+    start_recording=START_RECORDING
   )
 
   # Calculate stats for inspector for this iteration
   inspector_stats[iteration] = runanalysis.calc_stats_inspector(
     inspector_list=inspector_list,
     iteration=iteration,
-    sim_duration=SIM_TIME
+    sim_duration=SIM_TIME,
+    start_recording=START_RECORDING
   )
 
 
@@ -223,7 +229,7 @@ if __name__ == '__main__':
   inspector_stats = np.empty(shape=(ITERATIONS, ), dtype=object)
 
   start_time = time.time()
-  logging.info('Running the simulation with seed={seed}, iterations={iters} duration={duration}'.format(seed=SEED, iters=ITERATIONS, duration=SIM_TIME))
+  logging.info('Running the simulation with seed={seed}, iterations={iters} duration={duration}, wait={wait}'.format(seed=SEED, iters=ITERATIONS, duration=SIM_TIME, wait=START_RECORDING))
 
   for index, seed in enumerate(seed_list):
     run_iteration(seed=seed, means=means, iteration=index)

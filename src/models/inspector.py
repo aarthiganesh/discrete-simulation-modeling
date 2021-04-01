@@ -1,6 +1,6 @@
 import logging
 import random
-from typing import Generator, List
+from typing import Generator, List, Union
 
 import simpy
 from simpy import Environment
@@ -9,25 +9,28 @@ from .buffer import Buffer
 from .component import Component
 
 class Inspector(object):
-  def __init__(self, id: int,  env: Environment, components: List[Component], buffers: List[Buffer], means: dict) -> None:
+  def __init__(self, id: int,  env: Environment, components: List[Component], buffers: List[Buffer], means: dict, start_recording: Union[int, float]=0) -> None:
     super().__init__()
     self.id = id
     self.env = env
     self.buffers = buffers
     self.components = components
     self.means = means
+
+    # Stats for analysis
+    self.start_recording = start_recording
+    self.current_inspection_time = None
+    self.current_component = None
     self.start = 0
     self.end = 0
     self.wait_time = []
-    # self.inspection_time = []
-    self.inspection_time = {component.name:list() for component in components}
+    self.inspection_times = {component.name:list() for component in components}
     self.total_amount_inspected = {component.name:0 for component in components}
 
 
   def get_random_component(self) -> Component:
     '''Return a random component for the inspector to inspect'''
     return random.choice(self.components)
-    self.start = self.env.now
 
 
   def get_inspection_time(self, component: Component) -> float:
@@ -39,12 +42,11 @@ class Inspector(object):
     '''Retrieve a new component and inspect it'''
     # randomly select a component from within the list of inspectable components
     component = self.get_random_component()
+    self.current_component = component
 
     # Get inspection time
     inspection_time = self.get_inspection_time(component)
-
-    # Add inspection time to list
-    self.inspection_time[component.name].append(inspection_time)
+    self.current_inspection_time = inspection_time
     
     # inspect the component
     yield self.env.timeout(inspection_time)
@@ -69,22 +71,17 @@ class Inspector(object):
       if most_empty_buffer.level == most_empty_buffer.capacity:
         # Wait until at least one buffer is ready
         buffer_ready_events = [buffer.put(amount=1) for buffer in self.buffers]
-        start_time = self.env.now
+        self.start = self.env.now
         result = yield self.env.any_of(buffer_ready_events)
-        end_time = self.env.now
+        self.end = self.env.now  
         
-        # Add wait time to list
-        self.wait_time.append(self.end - self.start)
-        logging.debug('result of wait for inspector is {}, time={}'.format(result, end_time-start_time))
+        logging.debug('result of wait for inspector is {}, time={}'.format(result, self.end - self.start))
 
       # If buffer has space, add directly to that buffer
       else:
         self.start = self.env.now
         yield most_empty_buffer.put(amount=1)
         self.end = self.env.now
-
-        # Add wait time to list
-        self.wait_time.append(self.end - self.start)
     
 
     # Routing policy for inspector 2
@@ -96,18 +93,20 @@ class Inspector(object):
         self.start = self.env.now
         yield buffer_list[0].put(amount=1)
         self.end = self.env.now
-
-        # Add wait time to list
-        self.wait_time.append(self.end - self.start)
         logging.debug('inspector 2 put component {} in buffer {} at {}'.format(component.name, buffer_list[0].id, self.env.now))
-    
-
-    # At end, increment counter
-    self.total_amount_inspected[component.name] += 1
   
+
+  def record_stats(self) -> None:
+    '''Record stats about the inspector'''
+    self.total_amount_inspected[self.current_component.name] += 1
+    self.wait_time.append(self.end - self.start) # append buffer wait time
+    self.inspection_times[self.current_component.name].append(self.current_inspection_time)
+
 
   def main_loop(self) -> None:
     '''Main sequence loop for Inspector'''
     while True:
       component = yield self.env.process(self.inspect_component())
       yield self.env.process(self.add_component_to_buffer(component))
+      if (self.env.now >= self.start_recording):
+        self.record_stats()
