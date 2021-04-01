@@ -33,6 +33,8 @@ w1_processing_time = []
 w2_processing_time = []
 w3_processing_time = []
 
+workstation_finishing_times = {}
+
 
 def parse_arguments():
   '''Parse arguments from the command line'''
@@ -188,6 +190,10 @@ def run_iteration(seed: int, means: dict, iteration:int):
   # print('w1 wait time: {}'.format(w1_wait_time))
   # print('w2 wait time: {}'.format(w2_wait_time))
   # print('w3 wait time: {}'.format(w3_wait_time))
+
+  workstation_finishing_times[w1.id] = w1.component_finish_times
+  workstation_finishing_times[w2.id] = w2.component_finish_times
+  workstation_finishing_times[w3.id] = w3.component_finish_times
 
 
   # Calculate stats for workstation for this iteration

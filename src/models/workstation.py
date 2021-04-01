@@ -23,6 +23,7 @@ class Workstation(object):
     self.total_amount_assembled = 0
     self.wait_time = []
     self.processing_time = []
+    self.component_finish_times = []
     self.wait = 0
     self.start = 0
     self.end = 0
@@ -59,6 +60,7 @@ class Workstation(object):
     self.total_amount_assembled += 1
     self.wait_time.append(-self.wait+self.start)
     self.processing_time.append(self.end-self.start)
+    self.component_finish_times.append(self.end)
 
 
   def main_loop(self) -> None:
