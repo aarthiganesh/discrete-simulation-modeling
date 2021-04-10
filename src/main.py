@@ -241,14 +241,6 @@ if __name__ == '__main__':
   # Calculate stats for whole run
   ws_df = runanalysis.create_df_workstations(run_data=workstation_stats)
   insp_df = runanalysis.create_df_inspectors(run_data=inspector_stats)
-
-  # print('throughput for workstation 1 is {}'.format(ws_df.query('workstation_id==1')['throughput'].sum()))
-  # print('throughput for workstation 2 is {}'.format(ws_df.query('workstation_id==2')['throughput'].sum()))
-  # print('throughput for workstation 3 is {}'.format(ws_df.query('workstation_id==3')['throughput'].sum()))
-
-
-  # print(insp_df.query("component_id=='C2'"))
-
   
 
   ws_idle_replication = runanalysis.calculate_workstation_replications(
@@ -277,6 +269,37 @@ if __name__ == '__main__':
     iterations=ITERATIONS
   )
 
+  insp_idle_replication = runanalysis.calculate_inspector_replications(
+    data=insp_df[insp_df.index % 3 != 2],   # Filter out every third row (as that row contains duplicate info for this calculation)
+    group_col='inspector_id',
+    column='utilization',
+    criterion_percentage=0.01,
+    iterations=ITERATIONS
+  )
+
+  insp_idle_means = runanalysis.calculate_inspector_means(
+    data=insp_df[insp_df.index % 3 != 2],   # Filter out every third row (as that row contains duplicate info for this calculation)
+    group_col='inspector_id',
+    column='utilization',
+    iterations=ITERATIONS
+  )
+
+  insp_throughput_replication = runanalysis.calculate_inspector_replications(
+    data=insp_df,
+    group_col='component_id',
+    column='component_throughput',
+    criterion_percentage=0.01,
+    iterations=ITERATIONS
+  )
+
+  insp_throughput_means = runanalysis.calculate_inspector_means(
+    data=insp_df,
+    group_col='component_id',
+    column='component_throughput',
+    iterations=ITERATIONS
+  )
+
+  
   logging.info('Workstation Utilization Replications Calculations:\n{data}\n'.format( 
     data=ws_idle_replication
   ))
@@ -293,14 +316,28 @@ if __name__ == '__main__':
     data=ws_throughput_means
   ))
 
+  logging.info('Inspector Utilization Replication Calculations:\n{data}\n'.format( 
+    data=insp_idle_replication
+  ))
+
+  logging.info('Inspector Utilization Means Calculations:\n{data}\n'.format( 
+    data=insp_idle_means
+  ))
+
+  logging.info('Inspector Throughput Replications Calculations:\n{data}\n'.format( 
+    data=insp_throughput_replication
+  ))
+
+  logging.info('Inspector Throughput Means Calculations:\n{data}\n'.format( 
+    data=insp_throughput_means
+  ))
+
+
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',
     source='Workstation 1',
     quantity=ws_df.query('workstation_id==1')['processing_time_mean'].mean(skipna=True)
   ))
-
-
-  # This does not work if there is nan?
 
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',

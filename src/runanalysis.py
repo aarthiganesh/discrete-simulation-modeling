@@ -246,7 +246,7 @@ def calculate_workstation_replications(data: pd.DataFrame, column: str, criterio
   Args:
     data (pd.Dataframe): Dataframe of workstation data from each run of the workstation
     column (str): the column in the workstation dataframe on which to perform the calculations
-    criterion_percentage: The percentage of the calculated mean to be usedfor the error criterion t
+    criterion_percentage: The percentage of the calculated mean to be used for the error criterion t
     iterations (int): number of iterations used in this simulation
   
   Returns:
@@ -293,5 +293,65 @@ def calculate_workstation_means(data: pd.DataFrame, column: str, iterations: int
   df['half_interval'] = df.apply(lambda row: stats.t.ppf(1-0.025, df=(iterations-1)) * row['std_err'], axis=1)
 
   # df = ws_df.groupby('workstation_id')[column].agg(['count', 'mean', 'std', 'sem'])
+
+  return df
+
+
+
+def calculate_inspector_replications(data: pd.DataFrame, group_col: str, column: str, criterion_percentage: float, iterations: int) -> pd.DataFrame:
+  '''
+  Create a dataframe showing the number of iterations required to find the mean value
+  with the given error criterion for the given column for inspector data
+
+  Args:
+    data (pd.Dataframe): Dataframe of inspector data from each run of the inspector
+    group_col (str): Name of column by which to group the data (i.e. by inspector for utilization, or component for throughput)
+    column (str): the column in the inspector dataframe on which to perform the calculations
+    criterion_percentage: The percentage of the calculated mean to be used for the error criterion t
+    iterations (int): number of iterations used in this simulation
+  
+  Returns:
+    df: Dataframe containing the inspector id, number of runs, mean, standard deviation, 
+    standard error and half interval for the value of interest of each inspector
+  '''
+  df = pd.DataFrame(
+    columns=['inspector', 'R', 'mean', 'std_dev', 'error_criterion', 'num_replications']
+  )
+
+  df['mean'] = data.groupby(group_col)[column].mean()
+  df['std_dev'] = data.groupby(group_col)[column].std()
+  df['error_criterion'] = df.apply(lambda row: row['mean'] * criterion_percentage, axis=1)
+  df['num_replications'] = df.apply(lambda row: ((row['std_dev'] * stats.norm.ppf(1-(0.05/2))) / row['error_criterion']) ** 2, axis=1)
+  df['R'] = np.repeat(iterations, data[group_col].nunique()).tolist()
+  df['inspector'] = [1, 2, 2] if data[group_col].nunique() == 3 else [1, 2]
+
+  return df
+
+
+def calculate_inspector_means(data: pd.DataFrame, group_col: str, column: str, iterations: int) -> pd.DataFrame:
+  '''
+  Create a dataframe showing the mean, standard deviation, standard error and half
+  interval for a given column
+
+  Args:
+    data (pd.Dataframe): Dataframe of inspector data from each run of the inspector
+    group_col (str): Name of column by which to group the data (i.e. by inspector for utilization, or component for throughput)
+    column (str): the column in the inspector dataframe on which to perform the calculations
+    iterations (int): number of iterations used in this simulation
+  
+  Returns:
+    df: Dataframe containing the inspector id, number of runs, mean, standard deviation, 
+    standard error and half interval for the value of interest of each inspector
+  '''
+  df = pd.DataFrame(
+    columns=['inspector', 'R', 'mean', 'std_dev', 'std_err', 'half_interval']
+  )
+
+  df['mean'] = data.groupby(group_col)[column].mean()
+  df['std_dev'] = data.groupby(group_col)[column].std()
+  df['std_err'] = data.groupby(group_col)[column].sem()
+  df['half_interval'] = df.apply(lambda row: stats.t.ppf(1-0.025, df=(iterations-1)) * row['std_err'], axis=1)
+  df['R'] = np.repeat(iterations, data[group_col].nunique()).tolist()
+  df['inspector'] = [1, 2, 2] if data[group_col].nunique() == 3 else [1, 2]
 
   return df
