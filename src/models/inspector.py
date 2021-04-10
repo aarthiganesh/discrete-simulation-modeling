@@ -62,10 +62,20 @@ class Inspector(object):
       # Find the buffer with the least number of components
       # So long as the inspector's buffer list is sorted by priority (highest first),
       # this will always favor the highest priority buffer in case of a tie.
-      most_empty_buffer = self.buffers[0]
-      for buffer in self.buffers:
-        if buffer.level < most_empty_buffer.level:
-          most_empty_buffer = buffer
+      # ------------- REVERSE PRIORITY --------------
+      most_empty_buffer = self.buffers[2]
+      if self.buffers[1].level < most_empty_buffer.level:
+        most_empty_buffer = self.buffers[1]
+      elif self.buffers[0].level < most_empty_buffer.level:
+        most_empty_buffer = self.buffers[0]
+      # -------------------- END ---------------------
+
+      # ------------- UNCOMMENT FOR REGULAR PRIORITY --------------
+      # most_empty_buffer = self.buffers[0]
+      # for buffer in self.buffers:
+      #   if buffer.level < most_empty_buffer.level:
+      #     most_empty_buffer = buffer
+      # --------------------------- END ---------------------------
       
       # Test if all the buffers are full
       if most_empty_buffer.level == most_empty_buffer.capacity:
