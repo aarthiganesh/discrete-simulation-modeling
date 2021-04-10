@@ -1,10 +1,13 @@
 # Calculate statistics for each run of the simulation
 import logging
+import math
+from os import stat
 from typing import List, Union
 
 import numpy as np
 from numpy.core.fromnumeric import shape, var
 import pandas as pd
+import scipy.stats as stats
 
 from models import Inspector, Workstation
 
@@ -210,3 +213,85 @@ def create_df_inspectors(run_data: np.ndarray) -> pd.DataFrame:
 
   return df.astype('float')
 
+
+def calculate_inspector_utilization(inspector_data: pd.DataFrame) -> pd.DataFrame:
+  '''
+  Create a dataframe showing the utilization for each inspector
+
+  Args:
+    inspector_data: Dataframe of information from each run for the inspector
+
+  Returns:
+    df: Dataframe containing the inspector, R value, mean, standard deviation, 
+    standard error and half interval for the utilization of each inspector
+  '''
+  df = pd.DataFrame(
+    columns=['inspector', 'component', 'R', 'mean', 'std_dev', 'std_err', 'half_interval']
+  )
+
+  df['inspector'] = [1, 2]
+  df['component'] = ['C1', 'C2, C3']
+  df['R'] = [len(inspector_data.groupby('iteration')['iteration'].unique()), len(inspector_data.groupby('iteration')['iteration'].unique())]
+  df['mean'] = inspector_data.groupby('inspector_id')['utilization'].mean()
+  df['std_dev'] = inspector_data.groupby('inspector_id')['utilization'].std()
+  df['std_err'] = df.apply(lambda row: row['R'] / math.sqrt(row['std_dev']), axis=1)
+
+
+
+def calculate_workstation_replications(data: pd.DataFrame, column: str, criterion_percentage: float, iterations: int) -> pd.DataFrame:
+  '''
+  Create a dataframe showing the number of iterations required to find the mean value
+  with the given error criterion for the given column
+
+  Args:
+    data (pd.Dataframe): Dataframe of workstation data from each run of the workstation
+    column (str): the column in the workstation dataframe on which to perform the calculations
+    criterion_percentage: The percentage of the calculated mean to be usedfor the error criterion t
+    iterations (int): number of iterations used in this simulation
+  
+  Returns:
+    df: Dataframe containing the workstation id, number of runs, mean, standard deviation, 
+    standard error and half interval for the value of interest of each workstation
+  '''
+  df = pd.DataFrame(
+    columns=['R', 'mean', 'std_dev', 'error_criterion', 'num_replications']
+  )
+
+  df['mean'] = data.groupby('workstation_id')[column].mean()
+  df['std_dev'] = data.groupby('workstation_id')[column].std()
+  df['error_criterion'] = df.apply(lambda row: row['mean'] * criterion_percentage, axis=1)
+  df['num_replications'] = df.apply(lambda row: ((row['std_dev'] * stats.norm.ppf(1-(0.05/2))) / row['error_criterion']) ** 2, axis=1)
+  df['R'] = np.repeat(iterations, 3).tolist()
+
+  return df
+
+
+
+def calculate_workstation_means(data: pd.DataFrame, column: str, iterations: int) -> pd.DataFrame:
+  '''
+  Create a dataframe showing mean, standard deviation, standard error and half interval
+  for a given column
+
+  Args:
+    data (pd.Dataframe): Dataframe of workstation data from each run of the workstation
+    column (str): the column in the workstation dataframe on which to perform the calculations
+    iterations (int): number of iterations used in this simulation
+  
+  Returns:
+    df: Dataframe containing the workstation id, number of runs, mean, standard deviation, 
+    standard error and half interval for the value of interest of each workstation
+  '''
+  df = pd.DataFrame(
+    columns=['workstation', 'R', 'mean', 'std_dev', 'std_err', 'half_interval']
+  )
+
+  df['mean'] = data.groupby('workstation_id')[column].mean()
+  df['std_dev'] = data.groupby('workstation_id')[column].std()
+  df['std_err'] = data.groupby('workstation_id')[column].sem()
+  df['workstation'] = [1, 2, 3]
+  df['R'] = np.repeat(iterations, 3).tolist()
+  df['half_interval'] = df.apply(lambda row: stats.t.ppf(1-0.025, df=(iterations-1)) * row['std_err'], axis=1)
+
+  # df = ws_df.groupby('workstation_id')[column].agg(['count', 'mean', 'std', 'sem'])
+
+  return df

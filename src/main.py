@@ -6,12 +6,9 @@ from typing import List
 import sys
 
 import numpy as np
-from numpy.core.fromnumeric import mean
 
 import simpy
 from simpy.core import T
-
-import numpy
 
 from models import Buffer, Component, Inspector, Workstation, workstation
 import runanalysis
@@ -105,7 +102,7 @@ def print_progress_bar (iteration: int, total: int, prefix: str='', suffix: str=
   print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
   # Print New Line on Complete
   if iteration == total: 
-      print()
+      print('\n')
 
 def run_iteration(seed: int, means: dict, iteration:int):
   '''
@@ -251,6 +248,50 @@ if __name__ == '__main__':
 
 
   # print(insp_df.query("component_id=='C2'"))
+
+  
+
+  ws_idle_replication = runanalysis.calculate_workstation_replications(
+    data=ws_df,
+    column='utilization',
+    criterion_percentage=0.01,
+    iterations=ITERATIONS
+  )
+
+  ws_idle_means = runanalysis.calculate_workstation_means(
+    data=ws_df,
+    column='utilization',
+    iterations=ITERATIONS
+  )
+
+  ws_throughput_replication = runanalysis.calculate_workstation_replications(
+    data=ws_df,
+    column='throughput',
+    criterion_percentage=0.01,
+    iterations=ITERATIONS
+  )
+
+  ws_throughput_means = runanalysis.calculate_workstation_means(
+    data=ws_df,
+    column='throughput',
+    iterations=ITERATIONS
+  )
+
+  logging.info('Workstation Utilization Replications Calculations:\n{data}\n'.format( 
+    data=ws_idle_replication
+  ))
+
+  logging.info('Workstation Utilization Means Calculations:\n{data}\n'.format(
+    data=ws_idle_means
+  ))
+
+  logging.info('Workstation Throughput Replications Calculations:\n{data}\n'.format( 
+    data=ws_throughput_replication
+  ))
+
+  logging.info('Workstation Throughput Means Calculations:\n{data}\n'.format( 
+    data=ws_throughput_means
+  ))
 
   logging.info('{measurement} for {source}: {quantity}'.format(
     measurement='Average Processing Time',
