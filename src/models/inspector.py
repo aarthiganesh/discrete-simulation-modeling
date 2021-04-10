@@ -53,7 +53,7 @@ class Inspector(object):
     return component # Return the component so it can be placed in the correct buffer
 
 
-  def add_component_to_buffer(self, component: Component) -> Generator:
+  def add_component_to_buffer_original_routing(self, component: Component) -> Generator:
     '''Add the component to the correct buffer'''
     # Routing policy for inspector 1
     # Inspector 1 exclusively handles component 1
@@ -164,9 +164,10 @@ class Inspector(object):
       # Add the component to a buffer, according to the routing policy
       # for that inspector/component
       if (component == Component.C1):
-        yield self.env.process(self.add_component_to_buffer_random(component))
+        # yield self.env.process(self.add_component_to_buffer_random(component))
+        yield self.env.process(self.add_component_to_buffer_original_routing(component))
       else:
-        yield self.env.process(self.add_component_to_buffer(component))
+        yield self.env.process(self.add_component_to_buffer_insp_2(component))
       
       # Log stats, if simulation is no longer in the waiting period
       if (self.env.now >= self.start_recording):
